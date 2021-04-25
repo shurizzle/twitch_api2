@@ -52,14 +52,14 @@ use helix::RequestGet;
 /// [`get-custom-reward-redemption`](https://dev.twitch.tv/docs/api/reference#get-custom-reward-redemption)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetCustomRewardRedemptionRequest {
+pub struct GetCustomRewardRedemptionRequest<'a> {
     /// Provided broadcaster_id must match the user_id in the auth token
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 
     /// When ID is not provided, this parameter returns paginated Custom Reward Redemption objects for redemptions of the Custom Reward with ID reward_id
     #[builder(default, setter(into))]
-    pub reward_id: types::RewardId,
+    pub reward_id: types::RewardId<'a>,
 
     /// When id is not provided, this param is required and filters the paginated Custom Reward Redemption objects for redemptions with the matching status. Can be one of UNFULFILLED, FULFILLED or CANCELED
     #[builder(default, setter(into))]
@@ -80,27 +80,27 @@ pub struct GetCustomRewardRedemptionRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct CustomRewardRedemption {
+pub struct CustomRewardRedemption<'a> {
     /// The id of the broadcaster that the reward belongs to.
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 
     /// The display name of the broadcaster that the reward belongs to.
-    pub broadcaster_name: types::DisplayName,
+    pub broadcaster_name: types::DisplayName<'a>,
 
     /// Broadcaster’s user login name.
-    pub broadcaster_login: types::UserName,
+    pub broadcaster_login: types::UserName<'a>,
 
     /// The ID of the redemption.
-    pub id: types::RedemptionId,
+    pub id: types::RedemptionId<'a>,
 
     /// The ID of the user that redeemed the reward
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
 
     /// The display name of the user that redeemed the reward.
-    pub user_name: types::DisplayName,
+    pub user_name: types::DisplayName<'a>,
 
     ///The login of the user who redeemed the reward.
-    pub user_login: types::UserName,
+    pub user_login: types::UserName<'a>,
 
     /// Basic information about the Custom Reward that was redeemed at the time it was redeemed. { “id”: string, “title”: string, “prompt”: string, “cost”: int, }
     pub reward: Reward,
@@ -112,16 +112,16 @@ pub struct CustomRewardRedemption {
     pub status: CustomRewardRedemptionStatus,
 
     /// RFC3339 timestamp of when the reward was redeemed.
-    pub redeemed_at: types::Timestamp,
+    pub redeemed_at: types::Timestamp<'a>,
 }
 
 /// Information about the reward involved
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct Reward {
+pub struct Reward<'a> {
     /// The ID of the custom reward.
-    pub id: types::RewardId,
+    pub id: types::RewardId<'a>,
 
     /// The title of the custom reward.
     pub title: String,
@@ -133,8 +133,8 @@ pub struct Reward {
     pub cost: i64,
 }
 
-impl Request for GetCustomRewardRedemptionRequest {
-    type Response = Vec<CustomRewardRedemption>;
+impl<'a> Request for GetCustomRewardRedemptionRequest<'a> {
+    type Response = Vec<CustomRewardRedemption<'static>>;
 
     const PATH: &'static str = "channel_points/custom_rewards/redemptions";
     #[cfg(feature = "twitch_oauth2")]
@@ -142,9 +142,9 @@ impl Request for GetCustomRewardRedemptionRequest {
         &[twitch_oauth2::scopes::Scope::ChannelReadRedemptions];
 }
 
-impl RequestGet for GetCustomRewardRedemptionRequest {}
+impl<'a> RequestGet for GetCustomRewardRedemptionRequest<'a> {}
 
-impl helix::Paginated for GetCustomRewardRedemptionRequest {
+impl<'a> helix::Paginated for GetCustomRewardRedemptionRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 

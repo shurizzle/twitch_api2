@@ -26,9 +26,9 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 pub mod get_bits_leaderboard;
-pub mod get_cheermotes;
+//pub mod get_cheermotes;
 
 #[doc(inline)]
 pub use get_bits_leaderboard::{BitsLeaderboard, GetBitsLeaderboardRequest};
-#[doc(inline)]
-pub use get_cheermotes::{Cheermote, GetCheermotesRequest};
+//#[doc(inline)]
+//pub use get_cheermotes::{Cheermote, GetCheermotesRequest};

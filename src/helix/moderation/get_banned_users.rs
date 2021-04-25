@@ -45,15 +45,15 @@ use helix::RequestGet;
 /// [`get-banned-users`](https://dev.twitch.tv/docs/api/reference#get-banned-users)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetBannedUsersRequest {
+pub struct GetBannedUsersRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Filters the results and only returns a status object for users who are banned in this channel and have a matching user_id.
     /// Format: Repeated Query Parameter, eg. /moderation/banned?broadcaster_id=1&user_id=2&user_id=3
     /// Maximum: 100
     #[builder(default)]
-    pub user_id: Vec<types::UserId>,
+    pub user_id: Vec<types::UserId<'a>>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub after: Option<helix::Cursor>,
@@ -62,7 +62,7 @@ pub struct GetBannedUsersRequest {
     pub before: Option<helix::Cursor>,
     /// Number of values to be returned per page. Limit: 100. Default: 20.
     #[builder(setter(into), default)]
-    pub first: Option<String>,
+    pub first: Option<beef::Cow<'a, str>>,
 }
 
 /// Return Values for [Get Banned Users](super::get_banned_users)
@@ -71,28 +71,28 @@ pub struct GetBannedUsersRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct BannedUser {
+pub struct BannedUser<'a> {
     /// User ID of a user who has been banned.
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
     /// Display name of a user who has been banned.
-    pub user_name: types::DisplayName,
+    pub user_name: types::DisplayName<'a>,
     /// Login of a user who has been banned.
-    pub user_login: types::UserName,
+    pub user_login: types::UserName<'a>,
     /// RFC3339 formatted timestamp for timeouts; empty string for bans.
-    pub expires_at: Option<types::Timestamp>,
+    pub expires_at: Option<types::Timestamp<'a>>,
 }
 
-impl Request for GetBannedUsersRequest {
-    type Response = Vec<BannedUser>;
+impl<'a> Request for GetBannedUsersRequest<'a> {
+    type Response = Vec<BannedUser<'static>>;
 
     const PATH: &'static str = "moderation/banned";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ModerationRead];
 }
 
-impl RequestGet for GetBannedUsersRequest {}
+impl<'a> RequestGet for GetBannedUsersRequest<'a> {}
 
-impl helix::Paginated for GetBannedUsersRequest {
+impl<'a> helix::Paginated for GetBannedUsersRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 

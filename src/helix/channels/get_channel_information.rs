@@ -46,10 +46,10 @@ use helix::RequestGet;
 /// [`get-channel-information`](https://dev.twitch.tv/docs/api/reference#get-channel-information)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetChannelInformationRequest {
+pub struct GetChannelInformationRequest<'a> {
     /// ID of the channel
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 }
 
 /// Return Values for [Get Channel Information](super::get_channel_information)
@@ -58,15 +58,15 @@ pub struct GetChannelInformationRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct ChannelInformation {
+pub struct ChannelInformation<'a> {
     /// Twitch User ID of this channel owner
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Twitch user display name of this channel owner
-    pub broadcaster_name: types::UserName,
+    pub broadcaster_name: types::UserName<'a>,
     /// Current game ID being played on the channel
-    pub game_id: types::CategoryId,
+    pub game_id: types::CategoryId<'a>,
     /// Name of the game being played on the channel
-    pub game_name: types::CategoryId,
+    pub game_name: types::CategoryId<'a>,
     /// Language of the channel
     pub broadcaster_language: String,
     /// Title of the stream
@@ -76,15 +76,15 @@ pub struct ChannelInformation {
     pub description: String,
 }
 
-impl Request for GetChannelInformationRequest {
-    type Response = Option<ChannelInformation>;
+impl<'a> Request for GetChannelInformationRequest<'a> {
+    type Response = Option<ChannelInformation<'static>>;
 
     const PATH: &'static str = "channels";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[];
 }
 
-impl RequestGet for GetChannelInformationRequest {
+impl<'a> RequestGet for GetChannelInformationRequest<'a> {
     fn parse_inner_response(
         request: Option<Self>,
         uri: &http::Uri,
@@ -94,7 +94,7 @@ impl RequestGet for GetChannelInformationRequest {
     where
         Self: Sized,
     {
-        let response: helix::InnerResponse<Vec<ChannelInformation>> = helix::parse_json(response)
+        let response: helix::InnerResponse<Vec<ChannelInformation<'static>>> = helix::parse_json(response)
             .map_err(|e| {
             helix::HelixRequestGetError::DeserializeError(response.to_string(), e, uri.clone())
         })?;

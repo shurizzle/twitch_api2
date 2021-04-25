@@ -59,10 +59,10 @@ pub struct GetTopGamesRequest {
 /// Return Values for [Get Top Games](super::get_games)
 ///
 /// [`get-top-games`](https://dev.twitch.tv/docs/api/reference#get-top-games)
-pub type Game = types::TwitchCategory;
+pub type Game<'a> = types::TwitchCategory<'a>;
 
 impl Request for GetTopGamesRequest {
-    type Response = Vec<Game>;
+    type Response = Vec<Game<'static>>;
 
     const PATH: &'static str = "games/top";
     #[cfg(feature = "twitch_oauth2")]

@@ -216,6 +216,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
+name = "beef"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6736e2428df2ca2848d846c43e88745121a6654696e349ce0054a420815a7409"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1948,6 +1957,7 @@ name = "twitch_api2"
 version = "0.5.0-alpha.6"
 dependencies = [
  "async-trait",
+ "beef",
  "displaydoc",
  "dotenv",
  "futures",

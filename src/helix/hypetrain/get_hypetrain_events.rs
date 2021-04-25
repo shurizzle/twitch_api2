@@ -45,10 +45,10 @@ use helix::RequestGet;
 /// [`get-hype-train-events`](https://dev.twitch.tv/docs/api/reference#get-hype-train-events)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetHypeTrainEventsRequest {
+pub struct GetHypeTrainEventsRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub cursor: Option<helix::Cursor>,
@@ -57,7 +57,7 @@ pub struct GetHypeTrainEventsRequest {
     pub first: Option<usize>,
     /// Retreive a single event by event ID
     #[builder(default, setter(into))]
-    pub id: Option<String>,
+    pub id: Option<beef::Cow<'a, str>>,
 }
 
 /// Return Values for [Get Hype Train Events](super::get_hypetrain_events)
@@ -66,17 +66,17 @@ pub struct GetHypeTrainEventsRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct HypeTrainEvent {
+pub struct HypeTrainEvent<'a> {
     /// Event ID
     pub id: String,
     /// Displays hypetrain.{event_name}, currently only hypetrain.progression
     pub event_type: HypeTrainEventType,
     /// RFC3339 formatted timestamp for events.
-    pub event_timestamp: types::Timestamp,
+    pub event_timestamp: types::Timestamp<'a>,
     /// Returns the version of the endpoint.
     pub version: String,
     /// Returns `broadcaster_id`, `broadcaster_name`, `user_id`, `user_name`, and `expires_at`.
-    pub event_data: HypeTrainEventData,
+    pub event_data: HypeTrainEventData<'a>,
 }
 
 /// Type of Hype Train event
@@ -92,41 +92,41 @@ pub enum HypeTrainEventType {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct HypeTrainEventData {
+pub struct HypeTrainEventData<'a> {
     /// The requested broadcaster ID.
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// The time at which the hype train expires. The expiration is extended when the hype train reaches a new level.
-    pub expires_at: types::Timestamp,
+    pub expires_at: types::Timestamp<'a>,
     /// RFC3339 formatted timestamp of when another hype train can be started again
-    pub cooldown_end_time: types::Timestamp,
+    pub cooldown_end_time: types::Timestamp<'a>,
     /// The number of points required to reach the next level.
     pub goal: i64,
     /// The most recent contribution.
-    pub last_contribution: Contribution,
+    pub last_contribution: Contribution<'a>,
     /// Current level of hype train event.
     pub level: i64,
     /// The timestamp at which the hype train started.
-    pub started_at: types::Timestamp,
+    pub started_at: types::Timestamp<'a>,
     // FIXME: Contains a maximum of two user objects
     /// The contributors with the most points contributed.
-    pub top_contributions: Vec<Contribution>,
+    pub top_contributions: Vec<Contribution<'a>>,
     /// Total points contributed to the hype train.
     pub total: i64,
     /// The distinct ID of this Hype Train
     pub id: String,
 }
 
-impl Request for GetHypeTrainEventsRequest {
-    type Response = Vec<HypeTrainEvent>;
+impl<'a> Request for GetHypeTrainEventsRequest<'a> {
+    type Response = Vec<HypeTrainEvent<'static>>;
 
     const PATH: &'static str = "hypetrain/events";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[];
 }
 
-impl RequestGet for GetHypeTrainEventsRequest {}
+impl<'a> RequestGet for GetHypeTrainEventsRequest<'a> {}
 
-impl helix::Paginated for GetHypeTrainEventsRequest {
+impl<'a> helix::Paginated for GetHypeTrainEventsRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.cursor = cursor }
 }
 

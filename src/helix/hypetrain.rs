@@ -28,12 +28,12 @@ pub enum ContributionType {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct Contribution {
+pub struct Contribution<'a>{
     /// The total contributed.
     pub total: i64,
     #[serde(rename = "type")]
     /// Type of contribution. Valid values include bits, subscription.
     pub type_: ContributionType,
     /// The ID of the user.
-    pub user: types::UserId,
+    pub user: types::UserId<'a>,
 }

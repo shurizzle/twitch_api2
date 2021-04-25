@@ -60,10 +60,10 @@ use helix::RequestPatch;
 /// [`modify-channel-information`](https://dev.twitch.tv/docs/api/reference#modify-channel-information)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct ModifyChannelInformationRequest {
+pub struct ModifyChannelInformationRequest<'a> {
     /// ID of the channel
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 }
 
 // FIXME: Twitch docs sucks...
@@ -72,10 +72,10 @@ pub struct ModifyChannelInformationRequest {
 /// [`modify-channel-information`](https://dev.twitch.tv/docs/api/reference#modify-channel-information)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug, Default)]
 #[non_exhaustive]
-pub struct ModifyChannelInformationBody {
+pub struct ModifyChannelInformationBody<'a> {
     /// Current game ID being played on the channel. Use “0” or “” (an empty string) to unset the game.
     #[builder(default, setter(into))]
-    pub game_id: Option<types::CategoryId>,
+    pub game_id: Option<types::CategoryId<'a>>,
     /// Language of the channel
     #[builder(default, setter(into))]
     pub broadcaster_language: Option<String>,
@@ -84,7 +84,7 @@ pub struct ModifyChannelInformationBody {
     pub title: Option<String>,
 }
 
-impl helix::private::SealedSerialize for ModifyChannelInformationBody {}
+impl<'a> helix::private::SealedSerialize for ModifyChannelInformationBody<'a> {}
 /// Return Values for [Modify Channel Information](super::modify_channel_information)
 ///
 /// [`modify-channel-information`](https://dev.twitch.tv/docs/api/reference#modify-channel-information)
@@ -112,7 +112,7 @@ impl std::convert::TryFrom<http::StatusCode> for ModifyChannelInformation {
     }
 }
 
-impl Request for ModifyChannelInformationRequest {
+impl<'a> Request for ModifyChannelInformationRequest<'a> {
     type Response = ModifyChannelInformation;
 
     const PATH: &'static str = "channels";
@@ -120,8 +120,8 @@ impl Request for ModifyChannelInformationRequest {
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::UserEditBroadcast];
 }
 
-impl RequestPatch for ModifyChannelInformationRequest {
-    type Body = ModifyChannelInformationBody;
+impl<'a> RequestPatch for ModifyChannelInformationRequest<'a> {
+    type Body = ModifyChannelInformationBody<'a>;
 }
 
 #[test]

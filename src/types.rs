@@ -1,58 +1,60 @@
 //! Twitch types
 //!
 
+use beef::Cow;
+
 use serde::{Deserialize, Serialize};
 
 /// A user ID.
-pub type UserId = String;
+pub type UserId<'a> = Cow<'a,str>;
 
 /// A reward ID.
-pub type RewardId = String;
+pub type RewardId<'a> = Cow<'a,str>;
 
 /// A reward redemption ID.
-pub type RedemptionId = String;
+pub type RedemptionId<'a> = Cow<'a,str>;
 
 /// A username, also specified as login. Should not be capitalized.
-pub type UserName = Nickname;
+pub type UserName<'a> = Nickname<'a>;
 
 /// A users display name
-pub type DisplayName = String;
+pub type DisplayName<'a> = Cow<'a,str>;
 
 /// A nickname, not capitalized.
-pub type Nickname = String;
+pub type Nickname<'a> = Cow<'a,str>;
 
 /// RFC3339 timestamp
-pub type Timestamp = String;
+pub type Timestamp<'a> = Cow<'a,str>;
 
 /// A game or category ID
-pub type CategoryId = String;
+pub type CategoryId<'a> = Cow<'a,str>;
 
 /// A tag ID
-pub type TagId = String;
+pub type TagId<'a> = Cow<'a,str>;
 
 /// A video ID
-pub type VideoId = String;
+pub type VideoId<'a> = Cow<'a,str>;
 
 /// An EventSub Subscription ID
-pub type EventSubId = String;
+pub type EventSubId<'a> = Cow<'a,str>;
 
 /// A Team ID
-pub type TeamId = String;
+pub type TeamId<'a> = Cow<'a,str>;
 
 /// A Stream ID
-pub type StreamId = String;
+pub type StreamId<'a> = Cow<'a,str>;
 
 /// A game or category as defined by Twitch
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct TwitchCategory {
+pub struct TwitchCategory<'a> {
     ///Template URL for the game’s box art.
-    pub box_art_url: String,
+    pub box_art_url: Cow<'a, str>,
     /// Game or category ID.
-    pub id: CategoryId,
+    pub id: CategoryId<'a>,
     ///Game name.
-    pub name: String,
+    pub name: Cow<'a,str>,
 }
 
 /// Subscription tiers
@@ -244,16 +246,16 @@ pub enum CommercialLengthParseError {
 
 /// A user according to many endpoints
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct User {
+pub struct User<'a> {
     /// ID of the user
     #[serde(alias = "user_id")]
-    pub id: UserId,
+    pub id: UserId<'a>,
     /// Login name of the user, not capitalized
     #[serde(alias = "user_login")]
-    pub login: UserName,
+    pub login: UserName<'a>,
     /// Display name of user
     #[serde(alias = "user_display_name", alias = "user_name")]
-    pub display_name: DisplayName,
+    pub display_name: DisplayName<'a>,
 }
 
 /// Links to the same image of different sizes

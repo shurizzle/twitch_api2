@@ -46,15 +46,15 @@ use std::collections::HashMap;
 /// [`get-banned-events`](https://dev.twitch.tv/docs/api/reference#get-banned-events)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetBannedEventsRequest {
+pub struct GetBannedEventsRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Filters the results and only returns a status object for users who are banned in this channel and have a matching user_id.
     /// Format: Repeated Query Parameter, eg. /moderation/banned?broadcaster_id=1&user_id=2&user_id=3
     /// Maximum: 100
     #[builder(default)]
-    pub user_id: Vec<types::UserId>,
+    pub user_id: Vec<types::UserId<'a>>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub after: Option<helix::Cursor>,
@@ -69,13 +69,13 @@ pub struct GetBannedEventsRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct BannedEvent {
+pub struct BannedEvent<'a> {
     /// Event ID
     pub id: String,
     /// Displays `moderation.user.ban` or `moderation.user.unban`
     pub event_type: String,
     /// RFC3339 formatted timestamp for events.
-    pub event_timestamp: types::Timestamp,
+    pub event_timestamp: types::Timestamp<'a>,
     /// Returns the version of the endpoint.
     pub version: String,
     // FIXME: Should be a struct, maybe
@@ -83,17 +83,17 @@ pub struct BannedEvent {
     pub event_data: HashMap<String, String>,
 }
 
-impl Request for GetBannedEventsRequest {
-    type Response = Vec<BannedEvent>;
+impl<'a> Request for GetBannedEventsRequest<'a> {
+    type Response = Vec<BannedEvent<'static>>;
 
     const PATH: &'static str = "moderation/banned/events";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ModerationRead];
 }
 
-impl RequestGet for GetBannedEventsRequest {}
+impl<'a> RequestGet for GetBannedEventsRequest<'a> {}
 
-impl helix::Paginated for GetBannedEventsRequest {
+impl<'a> helix::Paginated for GetBannedEventsRequest<'_> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 

@@ -45,29 +45,29 @@ use helix::RequestGet;
 /// [`get-games`](https://dev.twitch.tv/docs/api/reference#get-games)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetGamesRequest {
+pub struct GetGamesRequest<'a> {
     /// Game ID. At most 100 id values can be specified.
     #[builder(default)]
-    pub id: Vec<types::CategoryId>,
+    pub id: Vec<types::CategoryId<'a>>,
     /// Game name. The name must be an exact match. For instance, “Pokemon” will not return a list of Pokemon games; instead, query the specific Pokemon game(s) in which you are interested. At most 100 name values can be specified.
     #[builder(default)]
-    pub name: Vec<String>,
+    pub name: Vec<beef::Cow<'a, str>>,
 }
 
 /// Return Values for [Get Games](super::get_games)
 ///
 /// [`get-games`](https://dev.twitch.tv/docs/api/reference#get-games)
-pub type Game = types::TwitchCategory;
+pub type Game<'a> = types::TwitchCategory<'a>;
 
-impl Request for GetGamesRequest {
-    type Response = Vec<Game>;
+impl<'a> Request for GetGamesRequest<'a> {
+    type Response = Vec<Game<'static>>;
 
     const PATH: &'static str = "games";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[];
 }
 
-impl RequestGet for GetGamesRequest {}
+impl<'a> RequestGet for GetGamesRequest<'a> {}
 
 #[test]
 fn test_request() {

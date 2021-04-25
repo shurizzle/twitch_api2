@@ -64,10 +64,10 @@ use helix::RequestPost;
 /// [`check-automod-status`](https://dev.twitch.tv/docs/api/reference#check-automod-status)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct CheckAutoModStatusRequest {
+pub struct CheckAutoModStatusRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 }
 
 /// Body Parameters for [Check AutoMod Status](super::check_automod_status)
@@ -75,21 +75,21 @@ pub struct CheckAutoModStatusRequest {
 /// [`check-automod-status`](https://dev.twitch.tv/docs/api/reference#check-automod-status)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug, Default)]
 #[non_exhaustive]
-pub struct CheckAutoModStatusBody {
+pub struct CheckAutoModStatusBody<'a> {
     /// Developer-generated identifier for mapping messages to results.
     #[builder(setter(into))]
-    pub msg_id: String,
+    pub msg_id: beef::Cow<'a, str>,
     /// Message text.
     #[builder(setter(into))]
-    pub msg_text: String,
+    pub msg_text: beef::Cow<'a, str>,
     /// User ID of the sender.
     #[builder(setter(into))]
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
 }
 
-impl CheckAutoModStatusBody {
+impl<'a> CheckAutoModStatusBody<'a> {
     /// Create a new [`CheckAutoModStatusBody`]
-    pub fn new(msg_id: String, msg_text: String, user_id: types::UserId) -> Self {
+    pub fn new(msg_id: beef::Cow<'a, str>, msg_text: beef::Cow<'a, str>, user_id: types::UserId<'a>) -> Self {
         Self {
             msg_id,
             msg_text,
@@ -98,11 +98,11 @@ impl CheckAutoModStatusBody {
     }
 }
 
-impl helix::HelixRequestBody for Vec<CheckAutoModStatusBody> {
+impl<'a> helix::HelixRequestBody for Vec<CheckAutoModStatusBody<'a>> {
     fn try_to_body(&self) -> Result<Vec<u8>, helix::BodyError> {
         #[derive(Serialize)]
-        struct InnerBody<'a> {
-            data: &'a Vec<CheckAutoModStatusBody>,
+        struct InnerBody<'i> {
+            data: &'i Vec<CheckAutoModStatusBody<'i>>,
         }
 
         serde_json::to_vec(&InnerBody { data: &self }).map_err(Into::into)
@@ -122,7 +122,7 @@ pub struct CheckAutoModStatus {
     pub is_permitted: bool,
 }
 
-impl Request for CheckAutoModStatusRequest {
+impl<'a> Request for CheckAutoModStatusRequest<'a> {
     type Response = Vec<CheckAutoModStatus>;
 
     const PATH: &'static str = "moderation/enforcements/status";
@@ -130,8 +130,8 @@ impl Request for CheckAutoModStatusRequest {
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ModerationRead];
 }
 
-impl RequestPost for CheckAutoModStatusRequest {
-    type Body = Vec<CheckAutoModStatusBody>;
+impl<'a> RequestPost for CheckAutoModStatusRequest<'a> {
+    type Body = Vec<CheckAutoModStatusBody<'a>>;
 }
 
 #[test]

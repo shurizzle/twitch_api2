@@ -47,13 +47,13 @@ use helix::RequestDelete;
 /// [`delete-custom-reward`](https://dev.twitch.tv/docs/api/reference#delete-custom-reward)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct DeleteCustomRewardRequest {
+pub struct DeleteCustomRewardRequest<'a> {
     /// Provided broadcaster_id must match the user_id in the auth token
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// ID of the Custom Reward to delete, must match a Custom Reward on broadcaster_id’s channel.
     #[builder(setter(into))]
-    pub id: types::RewardId,
+    pub id: types::RewardId<'a>,
 }
 // FIXME: Should return VideoIds
 /// Return Values for [Delete CustomReward](super::delete_custom_reward)
@@ -91,7 +91,7 @@ impl std::convert::TryFrom<http::StatusCode> for DeleteCustomReward {
     }
 }
 
-impl Request for DeleteCustomRewardRequest {
+impl<'a> Request for DeleteCustomRewardRequest<'a> {
     type Response = DeleteCustomReward;
 
     const PATH: &'static str = "channel_points/custom_rewards";
@@ -100,7 +100,7 @@ impl Request for DeleteCustomRewardRequest {
         &[twitch_oauth2::Scope::ChannelManageRedemptions];
 }
 
-impl RequestDelete for DeleteCustomRewardRequest {}
+impl<'a> RequestDelete for DeleteCustomRewardRequest<'a> {}
 
 #[test]
 fn test_request() {

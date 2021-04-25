@@ -46,19 +46,19 @@ use helix::RequestGet;
 /// [`get-moderators`](https://dev.twitch.tv/docs/api/reference#get-moderators)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetModeratorsRequest {
+pub struct GetModeratorsRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Filters the results and only returns a status object for users who are moderators in this channel and have a matching user_id.
     #[builder(setter(into), default)]
-    pub user_id: Vec<types::UserId>,
+    pub user_id: Vec<types::UserId<'a>>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub after: Option<helix::Cursor>,
     /// Number of values to be returned per page. Limit: 100. Default: 20.
     #[builder(setter(into), default)]
-    pub first: Option<String>,
+    pub first: Option<beef::Cow<'a, str>>,
 }
 
 /// Return Values for [Get Moderators](super::get_moderators)
@@ -67,26 +67,26 @@ pub struct GetModeratorsRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct Moderator {
+pub struct Moderator<'a> {
     /// User ID of a moderator in the channel.
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
     /// Display name of a moderator in the channel.
-    pub user_name: types::DisplayName,
+    pub user_name: types::DisplayName<'a>,
     /// Login of a moderator in the channel.
-    pub user_login: types::UserName,
+    pub user_login: types::UserName<'a>,
 }
 
-impl Request for GetModeratorsRequest {
-    type Response = Vec<Moderator>;
+impl<'a> Request for GetModeratorsRequest<'a> {
+    type Response = Vec<Moderator<'static>>;
 
     const PATH: &'static str = "moderation/moderators";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ModerationRead];
 }
 
-impl RequestGet for GetModeratorsRequest {}
+impl<'a> RequestGet for GetModeratorsRequest<'a> {}
 
-impl helix::Paginated for GetModeratorsRequest {
+impl<'a> helix::Paginated for GetModeratorsRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 

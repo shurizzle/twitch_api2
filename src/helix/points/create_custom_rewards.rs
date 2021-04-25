@@ -62,10 +62,10 @@ use helix::RequestPost;
 /// [`create-custom-rewards`](https://dev.twitch.tv/docs/api/reference#create-custom-rewards)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug, Default)]
 #[non_exhaustive]
-pub struct CreateCustomRewardRequest {
+pub struct CreateCustomRewardRequest<'a> {
     /// Provided broadcaster_id must match the user_id in the auth token
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 }
 
 /// Body Parameters for [Create Custom Rewards](super::create_custom_rewards)
@@ -73,13 +73,13 @@ pub struct CreateCustomRewardRequest {
 /// [`create-custom-rewards`](https://dev.twitch.tv/docs/api/reference#create-custom-rewards)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct CreateCustomRewardBody {
+pub struct CreateCustomRewardBody<'a> {
     /// The title of the reward
     #[builder(setter(into))]
-    pub title: String,
+    pub title: beef::Cow<'a, str>,
     /// The prompt for the viewer when they are redeeming the reward
     #[builder(default, setter(into))]
-    pub prompt: Option<String>,
+    pub prompt: Option<beef::Cow<'a, str>>,
     /// The cost of the reward
     pub cost: usize,
     /// Is the reward currently enabled, if false the reward won’t show up to viewers. Defaults true
@@ -87,7 +87,7 @@ pub struct CreateCustomRewardBody {
     pub is_enabled: Option<bool>,
     /// Custom background color for the reward. Format: Hex with # prefix. Example: #00E5CB.
     #[builder(default, setter(into))]
-    pub background_color: Option<String>,
+    pub background_color: Option<beef::Cow<'a, str>>,
     /// Does the user need to enter information when redeeming the reward. Defaults false
     #[builder(default, setter(into))]
     pub is_user_input_required: Option<bool>,
@@ -114,15 +114,15 @@ pub struct CreateCustomRewardBody {
     pub should_redemptions_skip_request_queue: Option<bool>,
 }
 
-impl helix::private::SealedSerialize for CreateCustomRewardBody {}
+impl<'a> helix::private::SealedSerialize for CreateCustomRewardBody<'a> {}
 
 /// Return Values for [Create Custom Rewards](super::create_custom_rewards)
 ///
 /// [`create-custom-rewards`](https://dev.twitch.tv/docs/api/reference#create-custom-rewards)
-pub type CreateCustomRewardResponse = super::CustomReward;
+pub type CreateCustomRewardResponse<'a> = super::CustomReward<'a>;
 
-impl Request for CreateCustomRewardRequest {
-    type Response = CreateCustomRewardResponse;
+impl<'a> Request for CreateCustomRewardRequest<'a> {
+    type Response = CreateCustomRewardResponse<'static>;
 
     const PATH: &'static str = "channel_points/custom_rewards";
     #[cfg(feature = "twitch_oauth2")]
@@ -130,8 +130,8 @@ impl Request for CreateCustomRewardRequest {
         &[twitch_oauth2::Scope::ChannelManageRedemptions];
 }
 
-impl RequestPost for CreateCustomRewardRequest {
-    type Body = CreateCustomRewardBody;
+impl<'a> RequestPost for CreateCustomRewardRequest<'a> {
+    type Body = CreateCustomRewardBody<'a>;
 
     fn parse_inner_response(
         request: Option<Self>,

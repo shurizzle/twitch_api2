@@ -46,10 +46,10 @@ use helix::RequestGet;
 /// [`get-channel-editors`](https://dev.twitch.tv/docs/api/reference#get-channel-editors)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetChannelEditorsRequest {
+pub struct GetChannelEditorsRequest<'a> {
     /// Broadcaster’s user ID associated with the channel.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
 }
 
 /// Return Values for [Get Channel Editors](super::get_channel_editors)
@@ -67,7 +67,7 @@ pub struct Editor {
     pub created_at: String,
 }
 
-impl Request for GetChannelEditorsRequest {
+impl<'a> Request for GetChannelEditorsRequest<'a> {
     type Response = Vec<Editor>;
 
     const PATH: &'static str = "channels/editors";
@@ -75,7 +75,7 @@ impl Request for GetChannelEditorsRequest {
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ChannelReadEditors];
 }
 
-impl RequestGet for GetChannelEditorsRequest {}
+impl<'a> RequestGet for GetChannelEditorsRequest<'a> {}
 
 #[test]
 fn test_request() {

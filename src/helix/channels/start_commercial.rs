@@ -51,9 +51,9 @@
 use super::*;
 use helix::RequestPost;
 
-impl StartCommercialRequest {
+impl<'a> StartCommercialRequest<'a> {
     /// Create a new [`StartCommercialRequest`]
-    pub fn new() -> Self { StartCommercialRequest {} }
+    pub fn new() -> Self { StartCommercialRequest {.. Default::default()} }
 }
 // Not implementing builder since it's not really needed...
 /// Query Parameters for [Start Commercial](super::start_commercial)
@@ -61,9 +61,11 @@ impl StartCommercialRequest {
 /// [`start-commercial`](https://dev.twitch.tv/docs/api/reference#start-commercial)
 #[derive(PartialEq, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct StartCommercialRequest {}
+pub struct StartCommercialRequest<'a> {
+    _phantom: std::marker::PhantomData<&'a ()>,
+}
 
-impl Default for StartCommercialRequest {
+impl<'a> Default for StartCommercialRequest<'a> {
     fn default() -> Self { StartCommercialRequest::new() }
 }
 
@@ -72,10 +74,10 @@ impl Default for StartCommercialRequest {
 /// [`start-commercial`](https://dev.twitch.tv/docs/api/reference#start-commercial)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct StartCommercialBody {
+pub struct StartCommercialBody<'a> {
     /// ID of the channel requesting a commercial
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Desired length of the commercial in seconds. Valid options are 30, 60, 90, 120, 150, 180.
     pub length: types::CommercialLength,
 }
@@ -95,7 +97,7 @@ pub struct StartCommercial {
     pub retry_after: u64,
 }
 
-impl Request for StartCommercialRequest {
+impl<'a> Request for StartCommercialRequest<'a> {
     /// FIXME: Make non-vec
     type Response = Vec<StartCommercial>;
 
@@ -104,16 +106,16 @@ impl Request for StartCommercialRequest {
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ChannelEditCommercial];
 }
 
-impl RequestPost for StartCommercialRequest {
-    type Body = StartCommercialBody;
+impl<'a> RequestPost for StartCommercialRequest<'a> {
+    type Body = StartCommercialBody<'a>;
 }
 
-impl helix::private::SealedSerialize for StartCommercialBody {}
+impl<'a> helix::private::SealedSerialize for StartCommercialBody<'a> {}
 
 #[test]
 fn test_request() {
     use helix::*;
-    let req = StartCommercialRequest {};
+    let req = StartCommercialRequest::default();
 
     let body = StartCommercialBody::builder()
         .broadcaster_id("1234")

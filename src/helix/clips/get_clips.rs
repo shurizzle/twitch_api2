@@ -45,13 +45,13 @@ use helix::RequestGet;
 /// [`get-clips`](https://dev.twitch.tv/docs/api/reference#get-clips)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetClipsRequest {
+pub struct GetClipsRequest<'a> {
     /// ID of the broadcaster for whom clips are returned. The number of clips returned is determined by the first query-string parameter (default: 20). Results are ordered by view count.
     #[builder(default, setter(into))]
-    pub broadcaster_id: Option<types::UserId>,
+    pub broadcaster_id: Option<types::UserId<'a>>,
     /// ID of the game for which clips are returned. The number of clips returned is determined by the first query-string parameter (default: 20). Results are ordered by view count.
     #[builder(default, setter(into))]
-    pub game_id: Option<types::CategoryId>,
+    pub game_id: Option<types::CategoryId<'a>>,
     /// ID of the clip being queried. Limit: 100.
     #[builder(default)]
     pub id: Vec<String>,
@@ -64,13 +64,13 @@ pub struct GetClipsRequest {
     pub before: Option<helix::Cursor>,
     /// Ending date/time for returned clips, in RFC3339 format. (Note that the seconds value is ignored.) If this is specified, started_at also must be specified; otherwise, the time period is ignored.
     #[builder(default)]
-    pub ended_at: Option<types::Timestamp>,
+    pub ended_at: Option<types::Timestamp<'a>>,
     /// Maximum number of objects to return. Maximum: 100. Default: 20.
     #[builder(default, setter(into))]
     pub first: Option<usize>,
     /// Starting date/time for returned clips, in RFC3339 format. (Note that the seconds value is ignored.) If this is specified, ended_at also should be specified; otherwise, the ended_at date/time will be 1 week after the started_at value.
     #[builder(default)]
-    pub started_at: Option<types::Timestamp>,
+    pub started_at: Option<types::Timestamp<'a>>,
 }
 
 /// Return Values for [Get Clips](super::get_clips)
@@ -79,23 +79,23 @@ pub struct GetClipsRequest {
 #[derive(PartialEq, Deserialize, Serialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct Clip {
+pub struct Clip<'a> {
     /// User ID of the stream from which the clip was created.
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Display name corresponding to broadcaster_id.
-    pub broadcaster_name: types::DisplayName,
+    pub broadcaster_name: types::DisplayName<'a>,
     /// Date when the clip was created.
-    pub created_at: types::Timestamp,
+    pub created_at: types::Timestamp<'a>,
     /// ID of the user who created the clip.
-    pub creator_id: types::UserId,
+    pub creator_id: types::UserId<'a>,
     /// Display name corresponding to creator_id.
-    pub creator_name: types::DisplayName,
+    pub creator_name: types::DisplayName<'a>,
     /// Duration of the Clip in seconds (up to 0.1 precision).
     pub duration: f64,
     /// URL to embed the clip.
     pub embed_url: String,
     /// ID of the game assigned to the stream when the clip was created.
-    pub game_id: types::CategoryId,
+    pub game_id: types::CategoryId<'a>,
     /// ID of the clip being queried.
     pub id: String,
     /// Language of the stream from which the clip was created.
@@ -107,22 +107,22 @@ pub struct Clip {
     /// URL where the clip can be viewed.
     pub url: String,
     /// ID of the video from which the clip was created.
-    pub video_id: types::VideoId,
+    pub video_id: types::VideoId<'a>,
     /// Number of times the clip has been viewed.
     pub view_count: i64,
 }
 
-impl Request for GetClipsRequest {
-    type Response = Vec<Clip>;
+impl<'a> Request for GetClipsRequest<'a> {
+    type Response = Vec<Clip<'static>>;
 
     const PATH: &'static str = "clips";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[];
 }
 
-impl RequestGet for GetClipsRequest {}
+impl<'a> RequestGet for GetClipsRequest<'a> {}
 
-impl helix::Paginated for GetClipsRequest {
+impl<'a> helix::Paginated for GetClipsRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 

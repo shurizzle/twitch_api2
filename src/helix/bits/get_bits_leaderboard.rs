@@ -49,7 +49,7 @@ use helix::RequestGet;
 /// [`get-bits-leaderboard`](https://dev.twitch.tv/docs/api/reference#get-bits-leaderboard)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetBitsLeaderboardRequest {
+pub struct GetBitsLeaderboardRequest<'a> {
     /// Number of results to be returned. Maximum: 100. Default: 10.
     #[builder(default, setter(into))]
     pub count: Option<i32>,
@@ -62,13 +62,13 @@ pub struct GetBitsLeaderboardRequest {
     /// * "year" – 00:00:00 on the first day of the year specified in started_at, through 00:00:00 on the first day of the following year.
     /// * "all" – The lifetime of the broadcaster's channel. If this is specified (or used by default), started_at is ignored.
     #[builder(default, setter(into))]
-    pub period: Option<String>,
+    pub period: Option<beef::Cow<'a, str>>,
     /// Timestamp for the period over which the returned data is aggregated. Must be in RFC 3339 format. If this is not provided, data is aggregated over the current period; e.g., the current day/week/month/year. This value is ignored if period is "all".
     #[builder(default, setter(into))]
-    pub started_at: Option<types::Timestamp>,
+    pub started_at: Option<types::Timestamp<'a>>,
     /// ID of the user whose results are returned; i.e., the person who paid for the Bits.
     #[builder(default, setter(into))]
-    pub user_id: Option<types::UserId>,
+    pub user_id: Option<types::UserId<'a>>,
 }
 
 /// Return Values for [Get Bits Leaderboard](super::get_bits_leaderboard)
@@ -77,11 +77,11 @@ pub struct GetBitsLeaderboardRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct BitsLeaderboard {
+pub struct BitsLeaderboard<'a> {
     /// Leaderboard
-    pub leaderboard: Vec<LeaderboardUser>,
+    pub leaderboard: Vec<LeaderboardUser<'a>>,
     /// Period over which the returned data is aggregated.
-    pub date_range: DateRange,
+    pub date_range: DateRange<'a>,
     /// Total number of results (users) returned. This is count or the total number of entries in the leaderboard, whichever is less.
     pub total: i64,
 }
@@ -90,39 +90,39 @@ pub struct BitsLeaderboard {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct DateRange {
+pub struct DateRange<'a> {
     /// Start of the date range for the returned data.
-    pub started_at: types::Timestamp,
+    pub started_at: types::Timestamp<'a>,
     /// End of the date range for the returned data.
-    pub ended_at: types::Timestamp,
+    pub ended_at: types::Timestamp<'a>,
 }
 
 /// Information about user in leaderboard
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct LeaderboardUser {
+pub struct LeaderboardUser<'a> {
     /// Leaderboard rank of the user.
     pub rank: i64,
     /// Leaderboard score (number of Bits) of the user
     pub score: i64,
     /// ID of the user (viewer) in the leaderboard entry.
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
     /// Display name corresponding to user_id.
-    pub user_name: types::DisplayName,
+    pub user_name: types::DisplayName<'a>,
     /// User login name.
-    pub user_login: types::UserName,
+    pub user_login: types::UserName<'a>,
 }
 
-impl Request for GetBitsLeaderboardRequest {
-    type Response = BitsLeaderboard;
+impl<'req> Request for GetBitsLeaderboardRequest<'req> {
+    type Response = BitsLeaderboard<'static>;
 
     const PATH: &'static str = "bits/leaderboard";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[];
 }
 
-impl RequestGet for GetBitsLeaderboardRequest {
+impl<'req> RequestGet for GetBitsLeaderboardRequest<'req> {
     fn parse_inner_response(
         request: Option<Self>,
         uri: &http::Uri,
@@ -133,9 +133,9 @@ impl RequestGet for GetBitsLeaderboardRequest {
         Self: Sized,
     {
         #[derive(PartialEq, Deserialize, Debug, Clone)]
-        struct InnerResponse {
-            data: Vec<LeaderboardUser>,
-            date_range: DateRange,
+        struct InnerResponse<'a> {
+            data: Vec<LeaderboardUser<'a>>,
+            date_range: DateRange<'a>,
             /// Total number of results (users) returned. This is count or the total number of entries in the leaderboard, whichever is less.
             total: i64,
         }

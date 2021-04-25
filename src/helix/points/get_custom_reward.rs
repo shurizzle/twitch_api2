@@ -48,13 +48,13 @@ use helix::RequestGet;
 /// [`get-custom-reward`](https://dev.twitch.tv/docs/api/reference#get-custom-reward)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetCustomRewardRequest {
+pub struct GetCustomRewardRequest<'a> {
     /// Provided broadcaster_id must match the user_id in the auth token
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// When used, this parameter filters the results and only returns reward objects for the Custom Rewards with matching ID. Maximum: 50
     #[builder(default, setter(into))]
-    pub id: Vec<types::RewardId>,
+    pub id: Vec<types::RewardId<'a>>,
     /// When set to true, only returns custom rewards that the calling client_id can manage. Defaults false.
     #[builder(default)]
     pub only_manageable_rewards: Option<bool>,
@@ -66,15 +66,15 @@ pub struct GetCustomRewardRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct CustomReward {
+pub struct CustomReward<'a> {
     /// ID of the channel the reward is for
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Login of the channel the reward is for
-    pub broadcaster_login: types::UserName,
+    pub broadcaster_login: types::UserName<'a>,
     /// Display name of the channel the reward is for
-    pub broadcaster_name: types::DisplayName,
+    pub broadcaster_name: types::DisplayName<'a>,
     /// ID of the reward
-    pub id: types::RewardId,
+    pub id: types::RewardId<'a>,
     /// The title of the reward
     pub title: String,
     /// The prompt for the viewer when they are redeeming the reward
@@ -106,11 +106,11 @@ pub struct CustomReward {
     /// The number of redemptions redeemed during the current live stream. Counts against the max_per_stream_setting limit. Null if the broadcasters stream isn’t live or max_per_stream_setting isn’t enabled.
     pub redemptions_redeemed_current_stream: Option<usize>,
     /// Timestamp of the cooldown expiration. Null if the reward isn’t on cooldown.
-    pub cooldown_expires_at: Option<types::Timestamp>,
+    pub cooldown_expires_at: Option<types::Timestamp<'a>>,
 }
 
-impl Request for GetCustomRewardRequest {
-    type Response = Vec<CustomReward>;
+impl<'a> Request for GetCustomRewardRequest<'a> {
+    type Response = Vec<CustomReward<'static>>;
 
     const PATH: &'static str = "channel_points/custom_rewards";
     #[cfg(feature = "twitch_oauth2")]
@@ -118,7 +118,7 @@ impl Request for GetCustomRewardRequest {
         &[twitch_oauth2::scopes::Scope::ChannelReadRedemptions];
 }
 
-impl RequestGet for GetCustomRewardRequest {}
+impl<'a> RequestGet for GetCustomRewardRequest<'a> {}
 
 #[test]
 fn test_request() {

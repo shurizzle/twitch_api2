@@ -45,10 +45,10 @@ use helix::RequestGet;
 /// [`get-followed-streams`](https://dev.twitch.tv/docs/api/reference#get-followed-streams)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetFollowedStreamsRequest {
+pub struct GetFollowedStreamsRequest<'a> {
     /// Returns streams broadcast by one or more specified user IDs. You can specify up to 100 IDs.
     #[builder(setter(into))]
-    pub user_id: types::UserId,
+    pub user_id: types::UserId<'a>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub after: Option<helix::Cursor>,

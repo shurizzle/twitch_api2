@@ -46,21 +46,21 @@ use std::collections::HashMap;
 /// [`get-moderator-events`](https://dev.twitch.tv/docs/api/reference#get-moderator-events)
 #[derive(PartialEq, typed_builder::TypedBuilder, Deserialize, Serialize, Clone, Debug)]
 #[non_exhaustive]
-pub struct GetModeratorEventsRequest {
+pub struct GetModeratorEventsRequest<'a> {
     /// Must match the User ID in the Bearer token.
     #[builder(setter(into))]
-    pub broadcaster_id: types::UserId,
+    pub broadcaster_id: types::UserId<'a>,
     /// Filters the results and only returns a status object for users who have been added or removed as moderators in this channel and have a matching user_id.
     /// Format: Repeated Query Parameter, eg. /moderation/moderators?broadcaster_id=1&user_id=2&user_id=3
     /// Maximum: 100
     #[builder(default)]
-    pub user_id: Vec<types::UserId>,
+    pub user_id: Vec<types::UserId<'a>>,
     /// Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response. The cursor value specified here is from the pagination response field of a prior query.
     #[builder(default)]
     pub after: Option<helix::Cursor>,
     /// Number of values to be returned per page. Limit: 100. Default: 20.
     #[builder(setter(into), default)]
-    pub first: Option<String>,
+    pub first: Option<beef::Cow<'a, str>>,
 }
 
 /// Return Values for [Get Moderators Events](super::get_moderator_events)
@@ -69,31 +69,31 @@ pub struct GetModeratorEventsRequest {
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct ModeratorEvent {
+pub struct ModeratorEvent<'a> {
     /// Event ID
-    pub id: String,
+    pub id: beef::Cow<'a, str>,
     // FIXME: Twitch docs sucks...
     /// Displays `moderation.moderator.add` or `moderation.moderator.remove`
-    pub event_type: String,
+    pub event_type: beef::Cow<'a, str>,
     /// RFC3339 formatted timestamp for events.
-    pub event_timestamp: types::Timestamp,
+    pub event_timestamp: types::Timestamp<'a>,
     /// Returns the version of the endpoint.
-    pub version: String,
+    pub version: beef::Cow<'a, str>,
     /// Returns `broadcaster_id`, `broadcaster_name`, `broadcaster_login`, `user_id`, `user_name`, `user_login` and `expires_at`.
     pub event_data: HashMap<String, String>,
 }
 
-impl Request for GetModeratorEventsRequest {
-    type Response = Vec<ModeratorEvent>;
+impl<'a> Request for GetModeratorEventsRequest<'a> {
+    type Response = Vec<ModeratorEvent<'static>>;
 
     const PATH: &'static str = "moderation/moderators/events";
     #[cfg(feature = "twitch_oauth2")]
     const SCOPE: &'static [twitch_oauth2::Scope] = &[twitch_oauth2::Scope::ModerationRead];
 }
 
-impl RequestGet for GetModeratorEventsRequest {}
+impl<'a> RequestGet for GetModeratorEventsRequest<'a> {}
 
-impl helix::Paginated for GetModeratorEventsRequest {
+impl<'a> helix::Paginated for GetModeratorEventsRequest<'a> {
     fn set_pagination(&mut self, cursor: Option<helix::Cursor>) { self.after = cursor }
 }
 
