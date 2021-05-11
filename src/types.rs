@@ -42,6 +42,12 @@ pub type TeamId = String;
 /// A Stream ID
 pub type StreamId = String;
 
+/// A poll ID
+pub type PollId = String;
+
+/// A poll choice ID
+pub type ChoiceId = String;
+
 /// A game or category as defined by Twitch
 #[derive(PartialEq, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
@@ -303,4 +309,24 @@ pub enum Max {
         #[serde(alias = "value")]
         max_per_user_per_stream: u32,
     },
+}
+
+/// Status of a poll
+#[derive(PartialEq, Deserialize, Serialize, Debug, Clone)]
+#[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "UPPERCASE")]
+#[non_exhaustive]
+pub enum PollStatus {
+    /// Poll is currently in progress.
+    Active,
+    /// Poll has reached its ended_at time.
+    Completed,
+    /// Poll has been manually terminated before its ended_at time.
+    Terminated,
+    /// Poll is no longer visible on the channel.
+    Archived,
+    /// Poll is no longer visible to any user on Twitch.
+    Moderated,
+    /// Something went wrong determining the state.
+    Invalid,
 }
